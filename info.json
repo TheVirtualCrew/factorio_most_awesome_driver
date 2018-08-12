@@ -1,11 +1,11 @@
 {
-  "name": "carcrashcounter",
+  "name": "most_awesome_driver",
   "version": "0.1.0",
-  "title": "Car crash counter",
-  "author": "Tim Vroom",
+  "title": "Most Awesome Driver mod",
+  "author": "Tim Vroom @TheVirtualCrew",
   "contact": "",
   "homepage": "",
   "factorio_version": "0.16",
   "dependencies": ["base >= 0.16"],
-  "description": "This mod will add a car crash counter."
+  "description": "This mod will add a car crash counter. As the most awesome driver you are, we need to keep track of it"
 }
