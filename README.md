@@ -6,4 +6,4 @@ Gives a little view on the side to show it
 ## Todo
 
 - Make settings/views configurable
-- Make multiplayer compatible
+- Create permission/access if in teams For now its a global counter
