@@ -29,7 +29,7 @@ data.raw["gui-style"].default.carcrash_table_style =
     priority = "extra-high-no-scale",
     corner_size = { 0, 0 },
     position = { 78, 18 },
-    opacity = 0.2
+    opacity = 0.5
   }
 }
 

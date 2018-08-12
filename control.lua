@@ -40,9 +40,10 @@ local awesomedrivermod = {
   end,
   trigger_hit = function(self, event)
     if event.entity.type == 'car'
+        or not event.cause
         or event.cause.type ~= 'car'
         or event.entity.force.name ~= 'player'
-        or event.force.name ~= 'player' then
+        or not event.force or event.force.name ~= 'player' then
       return
     end
 
@@ -87,8 +88,17 @@ script.on_event({ defines.events.on_gui_click }, function(event)
 end)
 
 
--- setup
+-- setup: Make sure the data is accesible when changing/updating mods
 script.on_init(function()
+  awesomedrivermod:initGlobal()
+  if #game.players >= 1 then
+    for _,player in pairs(game.players) do
+      awesomedrivermod:initPlayer(player);
+    end
+  end
+end)
+
+script.on_load(function()
   awesomedrivermod:initGlobal()
   if #game.players >= 1 then
     for _,player in pairs(game.players) do
