@@ -17,22 +17,25 @@ local awesomedrivermod = {
   globalSetup = false,
   initPlayer = function(self, player)
     self:initGlobal()
+    if self.data.player[player.index] == nil then
+      self.data.player[player.index] = {
+        counter = 0,
+        last_hit_tick = 0,
+        last_entity_position = {}
+      }
+    end
+
     local gui = gui
     gui:reset_tables()
-    gui.get_table(player)
+    gui:get_table(player)
   end,
   initGlobal = function(self)
     if self.globalSetup == false then
-      global.awesomedrivermod = {
-        counter = 0,
-        count_spacer = 10,
-        player = {}
-      }
-      self.data = global.awesomedrivermod
-      if gui.parent == nil then
-        gui.parent = self
-      end
       self.globalSetup = true
+    end
+    local gui = gui
+    if gui.parent == nil then
+      gui.parent = self
     end
   end,
   trigger_hit = function(self, event)
@@ -43,23 +46,15 @@ local awesomedrivermod = {
       return
     end
 
-    local player = event.cause.get_driver()
+    local player = event.cause.get_driver().player
     local equalPosition = equalPosition
     local gui = gui
 
     if ((not equalPosition(event.entity.position, self.data.player[player.index].last_entity_position)
         or (equalPosition(event.entity.position, self.data.player[player.index].last_entity_position) and self.data.player[player.index].last_hit_tick < (game.tick - self.data.count_spacer)))) then
-
-      if self.data.player[player.index] == nil then
-        self.data.player[player.index] = {
-          counter = 0,
-          last_hit_tick = 0,
-          last_entity_position = {}
-        }
-      end
-
       self.data.counter = self.data.counter + 1
       self.data.last_hit_tick = game.tick
+      self.data.player[player.index].last_entity_position = event.entity.position
       self.data.player[player.index].counter = self.data.player[player.index].counter + 1
       self.data.player[player.index].last_hit_tick = self.data.last_hit_tick
 
@@ -71,15 +66,20 @@ local awesomedrivermod = {
 script.on_event(defines.events.on_player_joined_game, function(event)
   local player = game.players[event.player_index]
   awesomedrivermod:initPlayer(player)
+
+  if (player.character == nil) then
+    player.create_character()
+  end
+
+  player.insert{name="car", count=1}
+  player.insert{name="small-electric-pole", count=10}
+  player.insert{name="rocket-fuel", count=2}
   --  local awesomedrivermod = awesomedrivermod
 end)
 
 script.on_nth_tick(60, function(e)
-  local prefix = prefix
-  local player = game.players[1]
-  local table = get_table(player)
-  if table ~= nil and table[prefix .. 'hit_since_value'] ~= nil then
-    table[prefix .. 'hit_since_value'].caption = get_time_display()
+  if awesomedrivermod.globalSetup then
+    gui:update_time_display()
   end
 end)
 

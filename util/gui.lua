@@ -9,7 +9,7 @@
 local gui = {
   parent = nil,
   multiplayer = false,
-  create_table = function(self, player)
+  get_table = function(self, player)
     local prefix = self.parent.data.prefix
     local flow = player.gui.left[prefix .. 'flow']
 
@@ -60,7 +60,7 @@ local gui = {
     local table
     local prefix = self.parent.data.prefix
     for index, player in pairs(game.players) do
-      table = gui.get_table(player)
+      table = self:get_table(player)
       table[prefix .."hit_value"].caption = self.parent.data.counter
       table[prefix .."hit_since_value"].caption = self.get_time_display(self.parent.data.last_hit_tick)
 
@@ -83,7 +83,7 @@ local gui = {
     local table
     local prefix = self.parent.data.prefix
     for index, player in pairs(game.players) do
-      table = self.get_table(player)
+      table = self:get_table(player)
       table[prefix .."hit_since_value"].caption = self.get_time_display(self.parent.data.last_hit_tick)
       if self.multiplayer then
         table[prefix .."player_hit_since_value"].caption = self.get_time_display(self.parent.data.player[index].last_hit_tick)
@@ -126,15 +126,15 @@ local gui = {
         end
         self:update_table()
       elseif event.element.name == prefix .. "plus_button" then
-        parent.counter = parent.counter + 1
+        parent.data.counter = parent.data.counter + 1
         parent.data.player[player.index].counter = parent.data.player[player.index].counter + 1
         self:update_table()
       elseif event.element.name == prefix .. "reset_button" then
-        parent.counter = 0
-        parent.last_hit_tick = game.tick
-        for index,data in pairs(parent.data.player) do
-          data.player[index].counter = 0
-          data.player[index].last_hit_tick = 0
+        parent.data.counter = 0
+        parent.data.last_hit_tick = game.tick
+        for _,data in pairs(parent.data.player) do
+          data.counter = 0
+          data.last_hit_tick = 0
         end
         self:update_table()
       end
