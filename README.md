@@ -7,4 +7,3 @@ Gives a little view on the side to show it
 
 - Make settings/views configurable
 - Make multiplayer compatible
-- Rename to Most Awesome Driver Mod
