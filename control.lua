@@ -1,104 +1,77 @@
 require('util');
 require("mod-gui")
-
-local prefix = 'carcrashcounter_';
-local carcrashcounter = {
-  counter = 0,
-  last_hit_tick = 0,
-  last_entity_position = '',
-  count_spacer = 10
-}
+local gui = require("util/gui")
 
 local equalPosition = function(a, b)
   return a.x == b.x and a.y == b.y
 end
 
-local get_table = function(player)
-  local prefix = prefix
-  local flow = player.gui.left[prefix .. 'flow']
+local awesomedrivermod = {
+  data = {
+    counter = 0,
+    last_hit_tick = 0,
+    count_spacer = 60,
+    prefix = 'awesomedrivermod_',
+    player = {}
+  },
+  globalSetup = false,
+  initPlayer = function(self, player)
+    self:initGlobal()
+    local gui = gui
+    gui:reset_tables()
+    gui.get_table(player)
+  end,
+  initGlobal = function(self)
+    if self.globalSetup == false then
+      global.awesomedrivermod = {
+        counter = 0,
+        count_spacer = 10,
+        player = {}
+      }
+      self.data = global.awesomedrivermod
+      if gui.parent == nil then
+        gui.parent = self
+      end
+      self.globalSetup = true
+    end
+  end,
+  trigger_hit = function(self, event)
+    if event.entity.type == 'car'
+        or event.cause.type ~= 'car'
+        or event.entity.force.name ~= 'player'
+        or event.force.name ~= 'player' then
+      return
+    end
 
-  if flow == nil then
-    flow = player.gui.left.add { type = "scroll-pane", name = prefix .. "flow" }
-  end
+    local player = event.cause.get_driver()
+    local equalPosition = equalPosition
+    local gui = gui
 
-  local table = flow[prefix .. 'table']
-  if table == nil then
-    table = flow.add {
-      type = 'table',
-      column_count = 2,
-      name = prefix .. 'table',
-      style = 'carcrash_table_style'
-    }
-  end
+    if ((not equalPosition(event.entity.position, self.data.player[player.index].last_entity_position)
+        or (equalPosition(event.entity.position, self.data.player[player.index].last_entity_position) and self.data.player[player.index].last_hit_tick < (game.tick - self.data.count_spacer)))) then
 
-  local button_table = flow[prefix..'table_buttons']
-  if button_table == nil then
-    button_table = flow.add {
-      type = 'table',
-      column_count = 3,
-      name = prefix .. 'table_buttons',
-      style = 'carcrash_table_style'
-    }
-    button_table.add { type = 'button', style = "carcrash_button_style", name = prefix .. "min_button", caption = "-" }
-    button_table.add { type = 'button', style = "carcrash_button_style", name = prefix .. "plus_button", caption = "+" }
-    button_table.add { type = 'button', style = "carcrash_button_style", name = prefix .. "reset_button", caption = { "reset" } }
-  end
+      if self.data.player[player.index] == nil then
+        self.data.player[player.index] = {
+          counter = 0,
+          last_hit_tick = 0,
+          last_entity_position = {}
+        }
+      end
 
-  return table;
-end
+      self.data.counter = self.data.counter + 1
+      self.data.last_hit_tick = game.tick
+      self.data.player[player.index].counter = self.data.player[player.index].counter + 1
+      self.data.player[player.index].last_hit_tick = self.data.last_hit_tick
 
-local get_time_display = function()
-  local carcrashcounter = carcrashcounter
-  local ticks = (game.tick - carcrashcounter.last_hit_tick) / 60
-  local time = {
-    hours = math.floor(ticks / 3600),
-    minutes = math.floor(ticks % 3600 / 60),
-    seconds = math.floor(ticks % 60)
-  }
-  return string.format('%02d:%02d:%02d', time.hours, time.minutes, time.seconds)
-end
-
-local car_crash_update = function(e)
-  -- strange check because hits fire twice because the car gets damage as well
-  if e.entity.type == 'car' then
-    return
-  end
-
-  local equalPosition = equalPosition
-  local prefix = prefix
-  local carcrashcounter = carcrashcounter
-
-  if carcrashcounter.last_hit_tick >= game.tick - carcrashcounter.count_spacer then
-    return
-  end
-
-  if (e.force and e.force.name == 'player'
-      and e.entity.force.name == 'player'
-      and ((not equalPosition(e.entity.position, carcrashcounter.last_entity_position))
-      or (equalPosition(e.entity.position, carcrashcounter.last_entity_position) and carcrashcounter.last_hit_tick < (game.tick - (carcrashcounter.count_spacer * 6))))
-      and e.cause and e.cause.type == 'car') then
-    carcrashcounter.counter = carcrashcounter.counter + 1
-    carcrashcounter.last_hit_tick = game.tick
-    carcrashcounter.last_entity_position = util.table.deepcopy(e.entity.position)
-
-
-    local table = get_table(game.players[1]);
-    if table ~= nil and table[prefix .. 'hit_value'] ~= nil then
-      table[prefix .. 'hit_value'].caption = carcrashcounter.counter
+      gui:update_table()
     end
   end
-end
-
+}
 
 script.on_event(defines.events.on_player_joined_game, function(event)
   local player = game.players[event.player_index]
-  local table = get_table(player)
-  local carcrashcounter = carcrashcounter
-
-  table.add { type = 'label', name = prefix .. 'hit_label', caption = { "hits" }, style = 'bold_label' }
-  table.add { type = 'label', name = prefix .. 'hit_value', caption = carcrashcounter.counter }
-  table.add { type = 'label', name = prefix .. 'hit_since_label', caption = { "time-last-hit" }, style = 'bold_label' }
-  table.add { type = 'label', name = prefix .. 'hit_since_value', caption = get_time_display(), style = 'bold_label' }
+  awesomedrivermod:initPlayer(player)
+  --  local awesomedrivermod = awesomedrivermod
 end)
 
 script.on_nth_tick(60, function(e)
@@ -110,31 +83,14 @@ script.on_nth_tick(60, function(e)
   end
 end)
 
-script.on_event({ defines.events.on_entity_damaged }, car_crash_update)
+script.on_event({ defines.events.on_entity_damaged }, function(event)
+  awesomedrivermod:trigger_hit(event)
+end)
 
-script.on_event({ defines.events.on_entity_died }, car_crash_update)
+script.on_event({ defines.events.on_entity_died }, function(event)
+  awesomedrivermod:trigger_hit(event)
+end)
 
 script.on_event({ defines.events.on_gui_click }, function(event)
-  local prefix = prefix
-  local player = game.players[1]
-
-  if event.element.valid then
-    local table = get_table(player)
-    local carcrashcounter = carcrashcounter
-    if event.element.name == prefix .. "min_button" then
-      carcrashcounter.counter = carcrashcounter.counter - 1
-      if carcrashcounter.counter < 0 then
-        carcrashcounter.counter = 0;
-      end
-      table[prefix.."hit_value"].caption = carcrashcounter.counter
-    elseif event.element.name == prefix .. "plus_button" then
-      carcrashcounter.counter = carcrashcounter.counter + 1
-      table[prefix.."hit_value"].caption = carcrashcounter.counter
-    elseif event.element.name == prefix .. "reset_button" then
-      carcrashcounter.counter = 0
-      carcrashcounter.last_hit_tick = game.tick
-      table[prefix.."hit_value"].caption = carcrashcounter.counter
-      table[prefix.."hit_since_value"].caption = get_time_display()
-    end
-  end
+  gui:on_gui_click(event)
 end)
