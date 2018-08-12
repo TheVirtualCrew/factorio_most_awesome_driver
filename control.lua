@@ -85,3 +85,14 @@ end)
 script.on_event({ defines.events.on_gui_click }, function(event)
   gui:on_gui_click(event)
 end)
+
+
+-- setup
+script.on_init(function()
+  awesomedrivermod:initGlobal()
+  if #game.players >= 1 then
+    for _,player in pairs(game.players) do
+      awesomedrivermod:initPlayer(player);
+    end
+  end
+end)

@@ -31,7 +31,7 @@ local gui = {
       table.add { type = 'label', name = prefix .. 'hit_since_label', caption = { "time-last-hit" }, style = 'bold_label' }
       table.add { type = 'label', name = prefix .. 'hit_since_value', caption = "00:00:00", style = 'bold_label' }
 
-      if (#game.players > 1) then
+      if (self.multiplayer) then
         table.add { type = 'label', name = prefix .. 'player_hit_label', caption = { "player-hits" }, style = 'bold_label' }
         table.add { type = 'label', name = prefix .. 'player_hit_value', caption = "0" }
         table.add { type = 'label', name = prefix .. 'player_hit_since_label', caption = { "player-time-last-hit" }, style = 'bold_label' }
