@@ -66,15 +66,6 @@ local awesomedrivermod = {
 script.on_event(defines.events.on_player_joined_game, function(event)
   local player = game.players[event.player_index]
   awesomedrivermod:initPlayer(player)
-
-  if (player.character == nil) then
-    player.create_character()
-  end
-
-  player.insert{name="car", count=1}
-  player.insert{name="small-electric-pole", count=10}
-  player.insert{name="rocket-fuel", count=2}
-  --  local awesomedrivermod = awesomedrivermod
 end)
 
 script.on_nth_tick(60, function(e)
