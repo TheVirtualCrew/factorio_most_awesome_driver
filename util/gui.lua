@@ -13,6 +13,20 @@ local gui = {
     local prefix = self.parent.data.prefix
     local flow = player.gui.left[prefix .. 'flow']
 
+    if not player.valid or not player.mod_settings["awesomedrivermod-show-table"].value then
+      if flow then
+        flow.destroy()
+      end
+      return
+    end
+
+    if settings.global["awesomedrivermod-hide-when-car-not-researched"].value then
+      local tech = player.force.technologies.automobilism;
+      if tech.valid and not tech.researched then
+        return
+      end
+    end
+
     if flow == nil then
       flow = player.gui.left.add { type = "scroll-pane", name = prefix .. "flow" }
     end
@@ -25,6 +39,7 @@ local gui = {
         name = prefix .. 'table',
         style = 'carcrash_table_style'
       }
+      table.style.column_alignments[1] = "right"
 
       table.add { type = 'label', name = prefix .. 'hit_label', caption = { "hits" }, style = 'bold_label' }
       table.add { type = 'label', name = prefix .. 'hit_value', caption = "0" }
@@ -45,8 +60,7 @@ local gui = {
         button_table = flow.add {
           type = 'table',
           column_count = 3,
-          name = prefix .. 'table_buttons',
-          style = 'carcrash_table_style'
+          name = prefix .. 'table_buttons'
         }
         button_table.add { type = 'button', style = "carcrash_button_style", name = prefix .. "min_button", caption = "-" }
         button_table.add { type = 'button', style = "carcrash_button_style", name = prefix .. "plus_button", caption = "+" }
@@ -61,12 +75,14 @@ local gui = {
     local prefix = self.parent.data.prefix
     for index, player in pairs(game.players) do
       table = self:get_table(player)
-      table[prefix .."hit_value"].caption = self.parent.data.counter
-      table[prefix .."hit_since_value"].caption = self.get_time_display(self.parent.data.last_hit_tick)
+      if table then
+        table[prefix .. "hit_value"].caption = self.parent.data.counter
+        table[prefix .. "hit_since_value"].caption = self.get_time_display(self.parent.data.last_hit_tick)
 
-      if self.multiplayer then
-        table[prefix .."player_hit_value"].caption = self.parent.data.player[index].counter
-        table[prefix .."player_hit_since_value"].caption = self.get_time_display(self.parent.data.player[index].last_hit_tick)
+        if self.multiplayer then
+          table[prefix .. "player_hit_value"].caption = self.parent.data.player[index].counter
+          table[prefix .. "player_hit_since_value"].caption = self.get_time_display(self.parent.data.player[index].last_hit_tick)
+        end
       end
     end
   end,
@@ -84,9 +100,11 @@ local gui = {
     local prefix = self.parent.data.prefix
     for index, player in pairs(game.players) do
       table = self:get_table(player)
-      table[prefix .."hit_since_value"].caption = self.get_time_display(self.parent.data.last_hit_tick)
-      if self.multiplayer then
-        table[prefix .."player_hit_since_value"].caption = self.get_time_display(self.parent.data.player[index].last_hit_tick)
+      if table then
+        table[prefix .. "hit_since_value"].caption = self.get_time_display(self.parent.data.last_hit_tick)
+        if self.multiplayer then
+          table[prefix .. "player_hit_since_value"].caption = self.get_time_display(self.parent.data.player[index].last_hit_tick)
+        end
       end
     end
   end,
@@ -104,8 +122,9 @@ local gui = {
     if changed then
       local prefix = self.parent.data.prefix
       for _, player in pairs(game.players) do
-        player.gui.left[prefix .. "flow"][prefix .. "table"].destroy()
-        player.gui.left[prefix .. "flow"][prefix .. "table_buttons"].destroy()
+        if player.gui.left[prefix .. "flow"] then
+          player.gui.left[prefix .. "flow"].destroy()
+        end
       end
     end
   end,
@@ -132,7 +151,7 @@ local gui = {
       elseif event.element.name == prefix .. "reset_button" then
         parent.data.counter = 0
         parent.data.last_hit_tick = game.tick
-        for _,data in pairs(parent.data.player) do
+        for _, data in pairs(parent.data.player) do
           data.counter = 0
           data.last_hit_tick = 0
         end

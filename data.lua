@@ -10,8 +10,8 @@ data.raw["gui-style"].default.carcrash_table_style =
 {
   type = "table_style",
   cell_padding = 0,
-  horizontal_spacing = 2,
-  vertical_spacing = 2,
+  horizontal_spacing = 1,
+  vertical_spacing = 4,
   -- same as frame
   column_graphical_set =
   {
@@ -19,7 +19,7 @@ data.raw["gui-style"].default.carcrash_table_style =
     filename = "__core__/graphics/gui.png",
     priority = "extra-high-no-scale",
     corner_size = { 3, 3 },
-    position = { 0, 24 },
+    position = { 0, 0},
     opacity = 0.8
   },
   odd_row_graphical_set =
@@ -27,8 +27,8 @@ data.raw["gui-style"].default.carcrash_table_style =
     type = "composition",
     filename = "__core__/graphics/gui.png",
     priority = "extra-high-no-scale",
-    corner_size = { 0, 0 },
-    position = { 78, 18 },
+    corner_size = { 3, 3 },
+    position = { 78, 0 },
     opacity = 0.5
   }
 }
@@ -47,7 +47,7 @@ data.raw["gui-style"].default.carcrash_button_style =
     priority = "extra-high-no-scale",
     corner_size = { 3, 3 },
     position = { 0, 0 },
-    opacity = 0.6
+    opacity = 0.8
   },
   left_click_sound =
   {

@@ -17,6 +17,14 @@ local awesomedrivermod = {
   globalSetup = false,
   initPlayer = function(self, player)
     self:initGlobal()
+
+    if settings.global["awesomedrivermod-hide-when-car-not-researched"].value then
+      local research = player.force.technologies.automobilism;
+      if research and research.valid and not research.researched then
+        return
+      end
+    end
+
     if self.data.player[player.index] == nil then
       self.data.player[player.index] = {
         counter = 0,
@@ -103,6 +111,36 @@ script.on_load(function()
   if #game.players >= 1 then
     for _,player in pairs(game.players) do
       awesomedrivermod:initPlayer(player);
+    end
+  end
+end)
+
+script.on_event(defines.events.on_research_finished, function(event)
+  local tech = event.research
+
+  if settings.global["awesomedrivermod-hide-when-car-not-researched"].value then
+    if tech.valid and tech.name == 'automobilism' and tech.researched and tech.force and #tech.force.players > 0 then
+      for _, player in pairs(tech.force.players) do
+        awesomedrivermod:initPlayer(player)
+      end
+    end
+  end
+end)
+
+script.on_event(defines.events.on_runtime_mod_setting_changed, function(event)
+  local setting = event.setting
+  local prefix = awesomedrivermod.data.prefix
+
+  if setting == "awesomedrivermod-hide-when-car-not-researched" then
+    for _, player in pairs(game.players) do
+      if player.gui.left[prefix .. "flow"] then
+        player.gui.left[prefix .. "flow"].destroy()
+      end
+    end
+  elseif setting == "awesomedrivermod-show-table" then
+    local player = game.players[event.player_index]
+    if player and player.valid then
+      gui:get_table(player)
     end
   end
 end)
