@@ -1,3 +1,12 @@
+Version: 0.1.4
+Date: 13. 08. 2018
+    Fixes:
+        - When jumping out of the car before impact it could crash the game
+    Improvement:
+        - Seperated into forces so works on multiplayer team mode as wel
+        - Extra checks if the hit is valid and forces are setup correct
+        - Minor improvements to reduce lua lookups
+        - Now a car hitting a car is also registered as a hit
 
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.3
@@ -28,3 +37,5 @@ Version: 0.1.0
 Date: 12. 08. 2018
    Release:
        - Shows table wth counted hits
+
+---------------------------------------------------------------------------------------------------
