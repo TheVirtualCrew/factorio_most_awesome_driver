@@ -1,0 +1,30 @@
+
+---------------------------------------------------------------------------------------------------
+Version: 0.1.3
+Date: 13. 08. 2018
+    Fixes:
+        - Added settings to hide/show the table per player in mod-settings
+    Improvement:
+        - Made dependant on automobilism research before showing
+
+---------------------------------------------------------------------------------------------------
+Version: 0.1.2
+Date: 12. 08. 2018
+    Bugfix:
+        - When biters attacked the script could crash
+    Improvement:
+        - Makes use of default grey display instead of green
+
+---------------------------------------------------------------------------------------------------
+Version: 0.1.1
+Date: 12. 08. 2018
+   Added:
+       - Made compatible for multiplayer, untested
+   Bugfix:
+       - Could not load when in existing save game - init process was incorrect
+
+---------------------------------------------------------------------------------------------------
+Version: 0.1.0
+Date: 12. 08. 2018
+   Release:
+       - Shows table wth counted hits
