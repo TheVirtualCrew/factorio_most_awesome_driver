@@ -1,14 +1,20 @@
 --
--- Created by IntelliJ IDEA.
--- User: timvroom
--- Date: 12/08/2018
--- Time: 11:17
--- To change this template use File | Settings | File Templates.
+-- Create by TheVirtualCrew
 --
+
+local mod_gui = require('mod-gui')
 
 local gui = {
   parent = nil,
   multiplayer = false,
+  init_player_gui = function(self, player)
+    local button_flow = mod_gui.get_button_flow(player)
+    local prefix = self.parent.data.prefix
+    if not button_flow[prefix .. 'top_button'] then
+    end
+
+    self:get_table(player)
+  end,
   get_table = function(self, player)
     local prefix = self.parent.data.prefix
     local flow = player.gui.left[prefix .. 'flow']
@@ -52,6 +58,11 @@ local gui = {
         table.add { type = 'label', name = prefix .. 'player_hit_since_label', caption = { "player-time-last-hit" }, style = 'bold_label' }
         table.add { type = 'label', name = prefix .. 'player_hit_since_value', caption = "00:00:00" }
       end
+
+      table.add { type = 'label', name = prefix .. 'player_drivetime_label', caption = { "drivetime" }, style = 'bold_label' }
+      table.add { type = 'label', name = prefix .. 'player_drivetime_value', caption = "0" }
+      table.add { type = 'label', name = prefix .. 'player_highscore_label', caption = { "highscore" }, style = 'bold_label' }
+      table.add { type = 'label', name = prefix .. 'player_highscore_value', caption = "0" }
     end
 
     if player.admin then
@@ -79,23 +90,34 @@ local gui = {
       table = self:get_table(player)
       if table then
         forceData = self.parent:get_force_data(player.force)
+        playerData = self.parent:get_player_data(player)
         if (forceData) then
           table[prefix .. "hit_value"].caption = forceData.counter
           table[prefix .. "hit_since_value"].caption = self.get_time_display(forceData.last_hit_tick)
 
           if self.multiplayer then
-            playerData = self.parent:get_player_data(player)
-            if (playerData) then
               table[prefix .. "player_hit_value"].caption = playerData.counter
               table[prefix .. "player_hit_since_value"].caption = self.get_time_display(playerData.last_hit_tick)
-            end
           end
+          table[prefix .. "player_drivetime_value"].caption = self.get_time_display(self.parent:get_player_current_driving_time(player), false)
+          table[prefix .. "player_highscore_value"].caption = self.get_time_display(playerData.highscore, false)
         end
       end
     end
   end,
-  get_time_display = function(last_hit_tick)
-    local ticks = (game.tick - last_hit_tick) / 60
+  get_time_display = function(last_hit_tick, calculate)
+    if (calculate == nil) then
+      calculate = true
+    end
+
+    local ticks = last_hit_tick / 60
+
+    if calculate then
+      ticks = (game.tick - last_hit_tick) / 60
+    end
+    if last_hit_tick == 0 then
+      return '?'
+    end
     local time = {
       hours = math.floor(ticks / 3600),
       minutes = math.floor(ticks % 3600 / 60),
@@ -106,16 +128,20 @@ local gui = {
   update_time_display = function(self)
     local table
     local forceData
+    local playerData
     local prefix = self.parent.data.prefix
     for _, player in pairs(game.players) do
       table = self:get_table(player)
       forceData = self.parent:get_force_data(player.force)
+      playerData = self.parent:get_player_data(player)
 
       if table and forceData then
         table[prefix .. "hit_since_value"].caption = self.get_time_display(forceData.last_hit_tick)
-        if self.multiplayer then
-          table[prefix .. "player_hit_since_value"].caption = self.get_time_display(self.parent:get_player_data(player).last_hit_tick)
+        if self.multiplayer and playerData then
+          table[prefix .. "player_hit_since_value"].caption = self.get_time_display(playerData.last_hit_tick)
         end
+        table[prefix .. "player_drivetime_value"].caption = self.get_time_display(self.parent:get_player_current_driving_time(player), false)
+
       end
     end
   end,
@@ -145,26 +171,29 @@ local gui = {
     if event.element.valid then
       local parent = self.parent
       local prefix = parent.data.prefix
+      local forceData = parent:get_force_data(player.force)
+      local playerData = parent:get_player_data(player)
+
       if event.element.name == prefix .. "min_button" then
-        parent.data.forces[player.force.name].counter = parent.data.forces[player.force.name].counter - 1
-        if parent.data.forces[player.force.name].counter < 0 then
-          parent.data.forces[player.force.name].counter = 0;
+        forceData.counter = forceData.counter - 1
+        if forceData.counter < 0 then
+          forceData.counter = 0;
         end
-        parent.data.player[player.index].counter = parent.data.player[player.index].counter - 1
-        if parent.data.player[player.index].counter < 0 then
-          parent.data.player[player.index].counter = 0;
+        playerData.counter = playerData.counter - 1
+        if playerData.counter < 0 then
+          playerData.counter = 0;
         end
         self:update_table()
       elseif event.element.name == prefix .. "plus_button" then
-        parent.data.forces[player.force.name].counter = parent.data.forces[player.force.name].counter + 1
-        parent.data.player[player.index].counter = parent.data.player[player.index].counter + 1
+        forceData.counter = forceData.counter + 1
+        playerData.counter = playerData.counter + 1
         self:update_table()
       elseif event.element.name == prefix .. "reset_button" then
-        parent.data.forces[player.force.name].counter = 0
-        parent.data.forces[player.force.name].last_hit_tick = game.tick
+        forceData.counter = 0
+        forceData.last_hit_tick = game.tick
         for _, data in pairs(parent.data.player) do
           data.counter = 0
-          data.last_hit_tick = 0
+          data.last_hit_tick = forceData.last_hit_tick
         end
         self:update_table()
       end
