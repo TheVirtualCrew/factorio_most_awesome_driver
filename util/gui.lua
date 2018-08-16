@@ -43,7 +43,7 @@ local gui = {
         type = 'table',
         column_count = 2,
         name = prefix .. 'table',
-        style = 'carcrash_table_style'
+        style = 'awesomedriver_table_style'
       }
       table.style.column_alignments[1] = "right"
 
@@ -73,9 +73,9 @@ local gui = {
           column_count = 3,
           name = prefix .. 'table_buttons'
         }
-        button_table.add { type = 'button', style = "carcrash_button_style", name = prefix .. "min_button", caption = "-" }
-        button_table.add { type = 'button', style = "carcrash_button_style", name = prefix .. "plus_button", caption = "+" }
-        button_table.add { type = 'button', style = "carcrash_button_style", name = prefix .. "reset_button", caption = { "reset" } }
+        button_table.add { type = 'button', style = "awesomedriver_button_style", name = prefix .. "min_button", caption = "-" }
+        button_table.add { type = 'button', style = "awesomedriver_button_style", name = prefix .. "plus_button", caption = "+" }
+        button_table.add { type = 'button', style = "awesomedriver_button_style", name = prefix .. "reset_button", caption = { "reset" } }
       end
     end
 

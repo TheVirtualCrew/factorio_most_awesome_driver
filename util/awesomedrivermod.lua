@@ -16,6 +16,23 @@ local awesomedrivermod = {
     prefix = 'awesomedrivermod_',
     player = {}
   },
+  setting = {
+    enable = true,
+    enable_force = false,
+    disable_before_research = true,
+    sidebar = {
+      show_sidebar = true,
+      show_hits = true,
+      show_last_hit_time = true,
+      show_last_driving_hit_time = true,
+      show_highscore = true,
+      show_force_hits = false,
+      show_force_last_hit_time = false,
+      show_force_highscore = false,
+      show_buttons = false,
+    },
+  },
+  player_setting = {},
   globalSetup = false,
   init_player = function(self, player)
     self:init_global()
@@ -38,6 +55,10 @@ local awesomedrivermod = {
       }
     end
 
+    if not self.player_setting[player.index] then
+      self.player_setting[player.index] = util.table.deepcopy(self.setting.sidebar)
+    end
+
     self:init_force(player.force)
 
     local gui = gui
@@ -57,8 +78,20 @@ local awesomedrivermod = {
     if force and force.valid and not self.is_ignored_force(force) and not self.data.forces[force.name] then
       self.data.forces[force.name] = {
         counter = 0,
-        last_hit_tick = game.tick
+        last_hit_tick = game.tick,
+        highscore = 0,
       }
+    end
+  end,
+  set_setting = function(self, key, value, player, global)
+    local object
+    if string.find(key, 'global') ~= nil then
+      if (string.find(key, '.sidebar')) then
+
+      else
+      end
+
+      local object = self.setting.sidebar
     end
   end,
   trigger_hit = function(self, event)
