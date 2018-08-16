@@ -29,7 +29,7 @@ end)
 -- setup: Make sure the data is accesible when changing/updating mods
 script.on_init(function()
   awesomedrivermod:init_global()
-  if #game.players >= 1 then
+  if game and #game.players >= 1 then
     for _, player in pairs(game.players) do
       awesomedrivermod:init_player(player);
     end
@@ -38,11 +38,6 @@ end)
 
 script.on_load(function()
   awesomedrivermod:init_global()
-  if #game.players >= 1 then
-    for _, player in pairs(game.players) do
-      awesomedrivermod:init_player(player);
-    end
-  end
 end)
 
 script.on_event(defines.events.on_research_finished, function(event)
