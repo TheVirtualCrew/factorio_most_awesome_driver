@@ -18,15 +18,17 @@ local gui = {
   get_table = function(self, player)
     local prefix = self.parent.data.prefix
     local flow = player.gui.left[prefix .. 'flow']
+    local global_setting = settings.global;
+    local player_setting = settings.get_player_settings(player);
 
-    if not player.valid or not player.mod_settings["awesomedrivermod-show-table"].value then
+    if not player.valid or not player_setting["awesomedrivermod-show-table"].value then
       if flow then
         flow.destroy()
       end
       return
     end
 
-    if settings.global["awesomedrivermod-hide-when-car-not-researched"].value then
+    if global_setting["awesomedrivermod-hide-when-car-not-researched"].value then
       local tech = player.force.technologies.automobilism;
       if tech.valid and not tech.researched then
         return
@@ -47,25 +49,42 @@ local gui = {
       }
       table.style.column_alignments[1] = "right"
 
-      table.add { type = 'label', name = prefix .. 'hit_label', caption = { "hits" }, style = 'bold_label' }
-      table.add { type = 'label', name = prefix .. 'hit_value', caption = "0" }
-      table.add { type = 'label', name = prefix .. 'hit_since_label', caption = { "time-last-hit" }, style = 'bold_label' }
-      table.add { type = 'label', name = prefix .. 'hit_since_value', caption = "00:00:00" }
-
       if (self.multiplayer) then
-        table.add { type = 'label', name = prefix .. 'player_hit_label', caption = { "player-hits" }, style = 'bold_label' }
-        table.add { type = 'label', name = prefix .. 'player_hit_value', caption = "0" }
+        table.add { type = 'label', name = prefix .. 'hit_label', caption = { "hits" }, style = 'bold_label' }
+        table.add { type = 'label', name = prefix .. 'hit_value', caption = "0" }
+
+        if global_setting['awesomedrivermod-multiplayer-show-global-hit'].value then
+          table.add { type = 'label', name = prefix .. 'hit_since_label', caption = { "time-last-hit" }, style = 'bold_label' }
+          table.add { type = 'label', name = prefix .. 'hit_since_value', caption = "00:00:00" }
+        end
+
+        if player_setting['awesomedrivermod-multiplayer-show-highscore'].value then
+          table.add { type = 'label', name = prefix .. 'highscore_label', caption = { "highscore" }, style = 'bold_label' }
+          table.add { type = 'label', name = prefix .. 'highscore_value', caption = "0" }
+        end
+      end
+
+      table.add { type = 'label', name = prefix .. 'player_hit_label', caption = { "player-hits" }, style = 'bold_label' }
+      table.add { type = 'label', name = prefix .. 'player_hit_value', caption = "0" }
+
+      if player_setting['awesomedrivermod-show-global-hit'].value then
         table.add { type = 'label', name = prefix .. 'player_hit_since_label', caption = { "player-time-last-hit" }, style = 'bold_label' }
         table.add { type = 'label', name = prefix .. 'player_hit_since_value', caption = "00:00:00" }
       end
 
-      table.add { type = 'label', name = prefix .. 'player_drivetime_label', caption = { "drivetime" }, style = 'bold_label' }
-      table.add { type = 'label', name = prefix .. 'player_drivetime_value', caption = "0" }
-      table.add { type = 'label', name = prefix .. 'player_highscore_label', caption = { "highscore" }, style = 'bold_label' }
-      table.add { type = 'label', name = prefix .. 'player_highscore_value', caption = "0" }
+      if player_setting['awesomedrivermod-show-driving-hit'].value then
+        table.add { type = 'label', name = prefix .. 'player_drivetime_label', caption = { "drivetime" }, style = 'bold_label' }
+        table.add { type = 'label', name = prefix .. 'player_drivetime_value', caption = "0" }
+      end
+
+      if player_setting['awesomedrivermod-show-highscore'].value then
+        table.add { type = 'label', name = prefix .. 'player_highscore_label', caption = { "player-highscore" }, style = 'bold_label' }
+        table.add { type = 'label', name = prefix .. 'player_highscore_value', caption = "0" }
+      end
+      self:update_table();
     end
 
-    if player.admin then
+    if player.admin and global_setting['awesomedrivermod-show-change-buttons'].value then
       local button_table = flow[prefix .. 'table_buttons']
       if button_table == nil then
         button_table = flow.add {
@@ -76,6 +95,9 @@ local gui = {
         button_table.add { type = 'button', style = "awesomedriver_button_style", name = prefix .. "min_button", caption = "-" }
         button_table.add { type = 'button', style = "awesomedriver_button_style", name = prefix .. "plus_button", caption = "+" }
         button_table.add { type = 'button', style = "awesomedriver_button_style", name = prefix .. "reset_button", caption = { "reset" } }
+        if self.multiplayer then
+          button_table.add { type = 'button', style = "awesomedriver_button_style", name = prefix .. "reset_button_all", caption = { "reset all" } }
+        end
       end
     end
 
@@ -86,21 +108,29 @@ local gui = {
     local forceData
     local playerData
     local prefix = self.parent.data.prefix
+    local new_data
+
     for _, player in pairs(game.players) do
       table = self:get_table(player)
       if table then
         forceData = self.parent:get_force_data(player.force)
         playerData = self.parent:get_player_data(player)
-        if (forceData) then
-          table[prefix .. "hit_value"].caption = forceData.counter
-          table[prefix .. "hit_since_value"].caption = self.get_time_display(forceData.last_hit_tick)
 
-          if self.multiplayer then
-              table[prefix .. "player_hit_value"].caption = playerData.counter
-              table[prefix .. "player_hit_since_value"].caption = self.get_time_display(playerData.last_hit_tick)
+        if forceData then
+          new_data = {
+            hit_value = forceData.counter,
+            hit_since_value = self.get_time_display(forceData.last_hit_tick),
+            player_hit_value = playerData.counter,
+            player_hit_since_value = self.get_time_display(playerData.last_hit_tick),
+            player_drivetime_value = self.get_time_display(self.parent:get_player_current_driving_time(player), false),
+            player_highscore_value = self.get_time_display(playerData.highscore, false)
+          };
+
+          for k, v in pairs(new_data) do
+            if table[prefix .. k] then
+              table[prefix .. k].caption = v
+            end
           end
-          table[prefix .. "player_drivetime_value"].caption = self.get_time_display(self.parent:get_player_current_driving_time(player), false)
-          table[prefix .. "player_highscore_value"].caption = self.get_time_display(playerData.highscore, false)
         end
       end
     end
@@ -116,7 +146,7 @@ local gui = {
       ticks = (game.tick - last_hit_tick) / 60
     end
     if last_hit_tick == 0 then
-      return '?'
+      return '00:00:00'
     end
     local time = {
       hours = math.floor(ticks / 3600),
@@ -130,22 +160,30 @@ local gui = {
     local forceData
     local playerData
     local prefix = self.parent.data.prefix
+    local update
     for _, player in pairs(game.players) do
       table = self:get_table(player)
       forceData = self.parent:get_force_data(player.force)
       playerData = self.parent:get_player_data(player)
 
       if table and forceData then
-        table[prefix .. "hit_since_value"].caption = self.get_time_display(forceData.last_hit_tick)
-        if self.multiplayer and playerData then
-          table[prefix .. "player_hit_since_value"].caption = self.get_time_display(playerData.last_hit_tick)
+        update = {
+          hit_since_value = self.get_time_display(forceData.last_hit_tick),
+          player_drivetime_value = self.get_time_display(self.parent:get_player_current_driving_time(player), false),
+          player_hit_since_value = self.get_time_display(playerData.last_hit_tick)
+        }
+
+        for i, v in pairs(update) do
+          if table[prefix .. i] then
+            table[prefix .. i].caption = v
+          end
         end
-        table[prefix .. "player_drivetime_value"].caption = self.get_time_display(self.parent:get_player_current_driving_time(player), false)
 
       end
     end
   end,
-  reset_tables = function(self)
+  reset_tables = function(self, forced)
+    forced = forced or false
     local changed = false
     local count = #game.players
     if (count > 1 and not self.multiplayer) then
@@ -156,7 +194,7 @@ local gui = {
       changed = true
     end
 
-    if changed then
+    if changed or forced then
       local prefix = self.parent.data.prefix
       for _, player in pairs(game.players) do
         if player.gui.left[prefix .. "flow"] then
@@ -189,13 +227,24 @@ local gui = {
         playerData.counter = playerData.counter + 1
         self:update_table()
       elseif event.element.name == prefix .. "reset_button" then
-        forceData.counter = 0
-        forceData.last_hit_tick = game.tick
-        for _, data in pairs(parent.data.player) do
-          data.counter = 0
-          data.last_hit_tick = forceData.last_hit_tick
-        end
+        playerData.counter = 0
+        playerData.last_hit_tick = forceData.last_hit_tick
         self:update_table()
+      elseif event.element.name == prefix .. "reset_button_all" then
+        for _, fd in pairs(parent.data.forces) do
+          fd.counter = 0
+          fd.last_hit_tick = 0
+          fd.highscore = 0
+        end
+        for _, data in pairs(parent.data.player) do
+          for i, value  in pairs(data) do
+            if i == 'runtime-per-user' then
+              data[i] = { x = nil, y = nil }
+            else
+              data[i] = 0
+            end
+          end
+        end
       end
     end
   end

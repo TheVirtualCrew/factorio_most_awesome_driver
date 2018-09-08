@@ -16,23 +16,6 @@ local awesomedrivermod = {
     prefix = 'awesomedrivermod_',
     player = {}
   },
-  setting = {
-    enable = true,
-    enable_force = false,
-    disable_before_research = true,
-    sidebar = {
-      show_sidebar = true,
-      show_hits = true,
-      show_last_hit_time = true,
-      show_last_driving_hit_time = true,
-      show_highscore = true,
-      show_force_hits = false,
-      show_force_last_hit_time = false,
-      show_force_highscore = false,
-      show_buttons = false,
-    },
-  },
-  player_setting = {},
   globalSetup = false,
   init_player = function(self, player)
     self:init_global()
@@ -47,16 +30,12 @@ local awesomedrivermod = {
     if self.data.player[player.index] == nil then
       self.data.player[player.index] = {
         counter = 0,
-        last_hit_tick = 0,
+        last_hit_tick = game.tick,
         driving_ticks = 0,
         last_enter_tick = 0,
         highscore = 0,
-        last_entity_position = { x = nil, y = nil }
+        last_entity_position = {}
       }
-    end
-
-    if not self.player_setting[player.index] then
-      self.player_setting[player.index] = util.table.deepcopy(self.setting.sidebar)
     end
 
     self:init_force(player.force)
@@ -81,17 +60,6 @@ local awesomedrivermod = {
         last_hit_tick = game.tick,
         highscore = 0,
       }
-    end
-  end,
-  set_setting = function(self, key, value, player, global)
-    local object
-    if string.find(key, 'global') ~= nil then
-      if (string.find(key, '.sidebar')) then
-
-      else
-      end
-
-      local object = self.setting.sidebar
     end
   end,
   trigger_hit = function(self, event)
@@ -135,6 +103,10 @@ local awesomedrivermod = {
       if (playerData.highscore < driving_ticks) then
         playerData.highscore = driving_ticks
       end
+
+      if forceData.highscore < driving_ticks then
+        forceData.highscore = driving_ticks
+      end
       playerData.driving_ticks = 0
       playerData.last_enter_tick = game.tick
 
@@ -174,7 +146,7 @@ local awesomedrivermod = {
       return playerData.driving_ticks
     end
 
-    return false
+    return 0
   end,
   on_research_finished = function(self, event)
     local tech = event.research
@@ -186,7 +158,6 @@ local awesomedrivermod = {
         end
       end
     end
-
   end,
   on_runtime_mod_setting_changed = function(self, event)
     local setting = event.setting
@@ -199,9 +170,14 @@ local awesomedrivermod = {
         end
         self:init_player(player)
       end
-    elseif setting == "awesomedrivermod-show-table" then
+    end
+    if event.setting_type == 'runtime-per-user' then
       local player = game.players[event.player_index]
       if player and player.valid then
+        local flow = player.gui.left[prefix .. 'flow']
+        if flow and flow.valid and flow[prefix .. 'table'] then
+          flow[prefix .. 'table'].destroy()
+        end
         gui:get_table(player)
       end
     end
