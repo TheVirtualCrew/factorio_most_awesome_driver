@@ -41,6 +41,7 @@ local gui = {
 
     local table = flow[prefix .. 'table']
     if table == nil then
+
       table = flow.add {
         type = 'table',
         column_count = 2,
@@ -61,6 +62,20 @@ local gui = {
         if player_setting['awesomedrivermod-multiplayer-show-highscore'].value then
           table.add { type = 'label', name = prefix .. 'highscore_label', caption = { "highscore" }, style = 'bold_label' }
           table.add { type = 'label', name = prefix .. 'highscore_value', caption = "0" }
+        end
+
+        local buttonflow = mod_gui.get_button_flow(player)
+
+        if not buttonflow[prefix..'mp_button'] then
+          local button = buttonflow.add
+            {
+              type = "sprite-button",
+              name = prefix .. "mp_button",
+              style = mod_gui.button_style,
+              sprite = "graphics/icons/nilauscar",
+              tooltip = {"awesomdrivermod-mp-button-tooltip"}
+            }
+          button.style.visible = true
         end
       end
 
@@ -178,7 +193,6 @@ local gui = {
             table[prefix .. i].caption = v
           end
         end
-
       end
     end
   end,
@@ -205,14 +219,15 @@ local gui = {
   end,
   on_gui_click = function(self, event)
     local player = game.players[event.player_index]
+    local element = event.element
 
-    if event.element.valid then
+    if element.valid then
       local parent = self.parent
       local prefix = parent.data.prefix
       local forceData = parent:get_force_data(player.force)
       local playerData = parent:get_player_data(player)
 
-      if event.element.name == prefix .. "min_button" then
+      if element.name == prefix .. "min_button" then
         forceData.counter = forceData.counter - 1
         if forceData.counter < 0 then
           forceData.counter = 0;
@@ -222,22 +237,22 @@ local gui = {
           playerData.counter = 0;
         end
         self:update_table()
-      elseif event.element.name == prefix .. "plus_button" then
+      elseif element.name == prefix .. "plus_button" then
         forceData.counter = forceData.counter + 1
         playerData.counter = playerData.counter + 1
         self:update_table()
-      elseif event.element.name == prefix .. "reset_button" then
+      elseif element.name == prefix .. "reset_button" then
         playerData.counter = 0
         playerData.last_hit_tick = forceData.last_hit_tick
         self:update_table()
-      elseif event.element.name == prefix .. "reset_button_all" then
+      elseif element.name == prefix .. "reset_button_all" then
         for _, fd in pairs(parent.data.forces) do
           fd.counter = 0
           fd.last_hit_tick = 0
           fd.highscore = 0
         end
         for _, data in pairs(parent.data.player) do
-          for i, value  in pairs(data) do
+          for i, value in pairs(data) do
             if i == 'runtime-per-user' then
               data[i] = { x = nil, y = nil }
             else
@@ -245,8 +260,14 @@ local gui = {
             end
           end
         end
+      elseif element.name == prefix .. "mp_button" then
+
       end
     end
+  end,
+  open_mp_table = function(self, player)
+    local frame = player.gui
+
   end
 }
 

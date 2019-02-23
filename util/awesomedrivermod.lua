@@ -110,6 +110,8 @@ local awesomedrivermod = {
       playerData.driving_ticks = 0
       playerData.last_enter_tick = game.tick
 
+      script.raise_event(global.events.on_car_crash, {player_index = player.index, cause = event.cause, entity = event.entity})
+
       gui:update_table()
     end
   end,
@@ -175,10 +177,21 @@ local awesomedrivermod = {
       local player = game.players[event.player_index]
       if player and player.valid then
         local flow = player.gui.left[prefix .. 'flow']
-        if flow and flow.valid and flow[prefix .. 'table'] then
-          flow[prefix .. 'table'].destroy()
+        if flow and flow.valid then
+          flow.destroy()
         end
         gui:get_table(player)
+      end
+    end
+    if event.setting_type == 'runtime-global' then
+      for _, player in pairs(game.players) do
+        if player and player.valid then
+          local flow = player.gui.left[prefix .. 'flow']
+          if flow and flow.valid then
+            flow.destroy()
+          end
+          gui:get_table(player)
+        end
       end
     end
   end,

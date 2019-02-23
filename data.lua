@@ -5,6 +5,7 @@
 -- Time: 01:08
 -- To change this template use File | Settings | File Templates.
 --
+require("prototype.entities-cars")
 
 data.raw["gui-style"].default.awesomedriver_table_style =
 {
