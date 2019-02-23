@@ -5,8 +5,9 @@
 -- Time: 01:08
 -- To change this template use File | Settings | File Templates.
 --
+require("prototype.entities-cars")
 
-data.raw["gui-style"].default.carcrash_table_style =
+data.raw["gui-style"].default.awesomedriver_table_style =
 {
   type = "table_style",
   cell_padding = 0,
@@ -19,7 +20,7 @@ data.raw["gui-style"].default.carcrash_table_style =
     filename = "__core__/graphics/gui.png",
     priority = "extra-high-no-scale",
     corner_size = { 3, 3 },
-    position = { 0, 0},
+    position = { 0, 0 },
     opacity = 0.8
   },
   odd_row_graphical_set =
@@ -33,7 +34,7 @@ data.raw["gui-style"].default.carcrash_table_style =
   }
 }
 
-data.raw["gui-style"].default.carcrash_button_style =
+data.raw["gui-style"].default.awesomedriver_button_style =
 {
   type = "button_style",
   font = "default",
@@ -57,4 +58,3 @@ data.raw["gui-style"].default.carcrash_button_style =
     }
   }
 }
-

@@ -8,7 +8,6 @@ Gives a little view on the side to show it
 - Make settings/views configurable
     - car icon for button to show options (show increment/setting list, show table)
 - Make a scorelist of longest time without hit
-- Make counting be only incremented when
 
 ### Option list
 

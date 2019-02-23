@@ -30,11 +30,11 @@ local awesomedrivermod = {
     if self.data.player[player.index] == nil then
       self.data.player[player.index] = {
         counter = 0,
-        last_hit_tick = 0,
+        last_hit_tick = game.tick,
         driving_ticks = 0,
         last_enter_tick = 0,
         highscore = 0,
-        last_entity_position = { x = nil, y = nil }
+        last_entity_position = {}
       }
     end
 
@@ -57,7 +57,8 @@ local awesomedrivermod = {
     if force and force.valid and not self.is_ignored_force(force) and not self.data.forces[force.name] then
       self.data.forces[force.name] = {
         counter = 0,
-        last_hit_tick = game.tick
+        last_hit_tick = game.tick,
+        highscore = 0,
       }
     end
   end,
@@ -102,8 +103,14 @@ local awesomedrivermod = {
       if (playerData.highscore < driving_ticks) then
         playerData.highscore = driving_ticks
       end
+
+      if forceData.highscore < driving_ticks then
+        forceData.highscore = driving_ticks
+      end
       playerData.driving_ticks = 0
       playerData.last_enter_tick = game.tick
+
+      script.raise_event(global.events.on_car_crash, {player_index = player.index, cause = event.cause, entity = event.entity})
 
       gui:update_table()
     end
@@ -141,7 +148,7 @@ local awesomedrivermod = {
       return playerData.driving_ticks
     end
 
-    return false
+    return 0
   end,
   on_research_finished = function(self, event)
     local tech = event.research
@@ -153,7 +160,6 @@ local awesomedrivermod = {
         end
       end
     end
-
   end,
   on_runtime_mod_setting_changed = function(self, event)
     local setting = event.setting
@@ -166,10 +172,26 @@ local awesomedrivermod = {
         end
         self:init_player(player)
       end
-    elseif setting == "awesomedrivermod-show-table" then
+    end
+    if event.setting_type == 'runtime-per-user' then
       local player = game.players[event.player_index]
       if player and player.valid then
+        local flow = player.gui.left[prefix .. 'flow']
+        if flow and flow.valid then
+          flow.destroy()
+        end
         gui:get_table(player)
+      end
+    end
+    if event.setting_type == 'runtime-global' then
+      for _, player in pairs(game.players) do
+        if player and player.valid then
+          local flow = player.gui.left[prefix .. 'flow']
+          if flow and flow.valid then
+            flow.destroy()
+          end
+          gui:get_table(player)
+        end
       end
     end
   end,
