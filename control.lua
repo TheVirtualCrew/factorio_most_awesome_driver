@@ -4,12 +4,33 @@
 
 require('util');
 require("mod-gui")
-local gui = require("util/gui")
-local awesomedrivermod = require("util/awesomedrivermod")
 local events = {
   on_car_crash = script.generate_event_name()
 }
 global.events = events;
+global.data = {
+  forces = {},
+  count_spacer = 60,
+  prefix = 'awesomedrivermod_',
+  player = {},
+  globalSetup = false
+};
+require("util/awesomedrivermod")
+local awesomedrivermod = awesomedrivermod
+require('util/gui');
+local gui = gui
+
+local function init_globals()
+  global.events = global.events or events;
+  global.data = global.data or {
+    forces = {},
+    count_spacer = 60,
+    prefix = 'awesomedrivermod_',
+    player = {},
+    globalSetup = false
+  };
+  global.data.globalSetup = false;
+end
 
 script.on_event(defines.events.on_player_joined_game, function(event)
   local player = game.players[event.player_index]
@@ -22,9 +43,19 @@ script.on_event(defines.events.on_player_changed_force, function(event)
   awesomedrivermod:init_player(player)
 end)
 
-script.on_nth_tick(60, function(e)
-  if awesomedrivermod.globalSetup then
-    gui:update_time_display()
+script.on_nth_tick(60, function(event)
+  if (event.tick > 0) then
+    if not global.data.globalSetup then
+      awesomedrivermod:init_global()
+      if game and #game.players >= 1 then
+        for _, player in pairs(game.players) do
+          awesomedrivermod:init_player(player);
+        end
+      end
+    end
+    if global.data.globalSetup then
+      gui:update_time_display()
+    end
   end
 end)
 
@@ -38,17 +69,15 @@ end)
 
 -- setup: Make sure the data is accesible when changing/updating mods
 script.on_init(function()
-  awesomedrivermod:init_global()
-  if game and #game.players >= 1 then
-    for _, player in pairs(game.players) do
-      awesomedrivermod:init_player(player);
-    end
-  end
+  init_globals();
+  require('util/awesomedrivermod')
+  require('util/gui')
 end)
 
-script.on_load(function()
-  global.events = global.events or events;
-  awesomedrivermod:init_global()
+script.on_configuration_changed(function()
+  init_globals();
+  require('util/awesomedrivermod')
+  require('util/gui')
 end)
 
 script.on_event(defines.events.on_research_finished, function(event)
@@ -69,8 +98,8 @@ end)
 
 remote.add_interface('most_awesome_driver', {
   get_event = function(name)
-    if events[name] then
-      return events[name]
+    if global.events[name] then
+      return global.events[name]
     end
     return nil;
   end

@@ -4,24 +4,27 @@
 
 local mod_gui = require('mod-gui')
 
-local gui = {
-  parent = nil,
+gui = {
   multiplayer = false,
   init_player_gui = function(self, player)
     local button_flow = mod_gui.get_button_flow(player)
-    local prefix = self.parent.data.prefix
+    local prefix = global.data.prefix
     if not button_flow[prefix .. 'top_button'] then
     end
 
     self:get_table(player)
   end,
   get_table = function(self, player)
-    local prefix = self.parent.data.prefix
+    if not player or not player.valid then
+      return;
+    end
+
+    local prefix = global.data.prefix
     local flow = player.gui.left[prefix .. 'flow']
     local global_setting = settings.global;
     local player_setting = settings.get_player_settings(player);
 
-    if not player.valid or not player_setting["awesomedrivermod-show-table"].value then
+    if not player_setting["awesomedrivermod-show-table"].value then
       if flow then
         flow.destroy()
       end
@@ -51,10 +54,10 @@ local gui = {
       table.style.column_alignments[1] = "right"
 
       if (self.multiplayer) then
-        table.add { type = 'label', name = prefix .. 'hit_label', caption = { "hits" }, style = 'bold_label' }
-        table.add { type = 'label', name = prefix .. 'hit_value', caption = "0" }
 
-        if global_setting['awesomedrivermod-multiplayer-show-global-hit'].value then
+        if player_setting['awesomedrivermod-multiplayer-show-global-hit'].value then
+          table.add { type = 'label', name = prefix .. 'hit_label', caption = { "hits" }, style = 'bold_label' }
+          table.add { type = 'label', name = prefix .. 'hit_value', caption = "0" }
           table.add { type = 'label', name = prefix .. 'hit_since_label', caption = { "time-last-hit" }, style = 'bold_label' }
           table.add { type = 'label', name = prefix .. 'hit_since_value', caption = "00:00:00" }
         end
@@ -64,18 +67,20 @@ local gui = {
           table.add { type = 'label', name = prefix .. 'highscore_value', caption = "0" }
         end
 
-        local buttonflow = mod_gui.get_button_flow(player)
+        if global_setting["awesomedrivermod-multiplayer-show-forces-button"].value then
+          local buttonflow = mod_gui.get_button_flow(player)
 
-        if not buttonflow[prefix..'mp_button'] then
-          local button = buttonflow.add
-            {
-              type = "sprite-button",
-              name = prefix .. "mp_button",
-              style = mod_gui.button_style,
-              sprite = "graphics/icons/nilauscar",
-              tooltip = {"awesomdrivermod-mp-button-tooltip"}
-            }
-          button.style.visible = true
+          if not buttonflow[prefix .. 'mp_button'] then
+            local button = buttonflow.add
+              {
+                type = "sprite-button",
+                name = prefix .. "mp_button",
+                style = mod_gui.button_style,
+                sprite = "item-group/mad-car",
+                tooltip = { "awesomdrivermod-mp-button-tooltip" }
+              }
+            button.style.visible = true
+          end
         end
       end
 
@@ -99,7 +104,7 @@ local gui = {
       self:update_table();
     end
 
-    if player.admin and global_setting['awesomedrivermod-show-change-buttons'].value then
+    if player.admin and player_setting['awesomedrivermod-show-change-buttons'].value then
       local button_table = flow[prefix .. 'table_buttons']
       if button_table == nil then
         button_table = flow.add {
@@ -111,7 +116,7 @@ local gui = {
         button_table.add { type = 'button', style = "awesomedriver_button_style", name = prefix .. "plus_button", caption = "+" }
         button_table.add { type = 'button', style = "awesomedriver_button_style", name = prefix .. "reset_button", caption = { "reset" } }
         if self.multiplayer then
-          button_table.add { type = 'button', style = "awesomedriver_button_style", name = prefix .. "reset_button_all", caption = { "reset all" } }
+          button_table.add { type = 'button', style = "awesomedriver_button_style", name = prefix .. "reset_button_all", caption = { "reset-all" } }
         end
       end
     end
@@ -122,14 +127,14 @@ local gui = {
     local table
     local forceData
     local playerData
-    local prefix = self.parent.data.prefix
+    local prefix = global.data.prefix
     local new_data
 
     for _, player in pairs(game.players) do
       table = self:get_table(player)
       if table then
-        forceData = self.parent:get_force_data(player.force)
-        playerData = self.parent:get_player_data(player)
+        forceData = awesomedrivermod:get_force_data(player.force)
+        playerData = awesomedrivermod:get_player_data(player)
 
         if forceData then
           new_data = {
@@ -137,7 +142,7 @@ local gui = {
             hit_since_value = self.get_time_display(forceData.last_hit_tick),
             player_hit_value = playerData.counter,
             player_hit_since_value = self.get_time_display(playerData.last_hit_tick),
-            player_drivetime_value = self.get_time_display(self.parent:get_player_current_driving_time(player), false),
+            player_drivetime_value = self.get_time_display(awesomedrivermod:get_player_current_driving_time(player), false),
             player_highscore_value = self.get_time_display(playerData.highscore, false)
           };
 
@@ -155,13 +160,14 @@ local gui = {
       calculate = true
     end
 
+    if last_hit_tick == 0 or not last_hit_tick then
+      return '00:00:00'
+    end
+
     local ticks = last_hit_tick / 60
 
     if calculate then
       ticks = (game.tick - last_hit_tick) / 60
-    end
-    if last_hit_tick == 0 then
-      return '00:00:00'
     end
     local time = {
       hours = math.floor(ticks / 3600),
@@ -174,17 +180,17 @@ local gui = {
     local table
     local forceData
     local playerData
-    local prefix = self.parent.data.prefix
+    local prefix = global.data.prefix
     local update
     for _, player in pairs(game.players) do
       table = self:get_table(player)
-      forceData = self.parent:get_force_data(player.force)
-      playerData = self.parent:get_player_data(player)
+      forceData = awesomedrivermod:get_force_data(player.force)
+      playerData = awesomedrivermod:get_player_data(player)
 
       if table and forceData then
         update = {
           hit_since_value = self.get_time_display(forceData.last_hit_tick),
-          player_drivetime_value = self.get_time_display(self.parent:get_player_current_driving_time(player), false),
+          player_drivetime_value = self.get_time_display(awesomedrivermod:get_player_current_driving_time(player), false),
           player_hit_since_value = self.get_time_display(playerData.last_hit_tick)
         }
 
@@ -209,7 +215,7 @@ local gui = {
     end
 
     if changed or forced then
-      local prefix = self.parent.data.prefix
+      local prefix = global.data.prefix
       for _, player in pairs(game.players) do
         if player.gui.left[prefix .. "flow"] then
           player.gui.left[prefix .. "flow"].destroy()
@@ -222,8 +228,8 @@ local gui = {
     local element = event.element
 
     if element.valid then
-      local parent = self.parent
-      local prefix = parent.data.prefix
+      local parent = awesomedrivermod
+      local prefix = global.data.prefix
       local forceData = parent:get_force_data(player.force)
       local playerData = parent:get_player_data(player)
 
@@ -243,7 +249,11 @@ local gui = {
         self:update_table()
       elseif element.name == prefix .. "reset_button" then
         playerData.counter = 0
-        playerData.last_hit_tick = forceData.last_hit_tick
+        playerData.last_hit_tick = game.tick;
+        playerData.driving_ticks = 0;
+        playerData.highscore = 0;
+        playerData.last_entity_position = {}
+
         self:update_table()
       elseif element.name == prefix .. "reset_button_all" then
         for _, fd in pairs(parent.data.forces) do
@@ -261,15 +271,11 @@ local gui = {
           end
         end
       elseif element.name == prefix .. "mp_button" then
-
+        -- todo: create nice overview
       end
     end
   end,
   open_mp_table = function(self, player)
     local frame = player.gui
-
   end
 }
-
-return gui
-

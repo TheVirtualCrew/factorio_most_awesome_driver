@@ -8,6 +8,13 @@ data:extend({
   },
   {
     type = "bool-setting",
+    name = "awesomedrivermod-show-mp-table",
+    setting_type = "runtime-per-user",
+    default_value = false,
+    order = 'a-a'
+  },
+  {
+    type = "bool-setting",
     name = "awesomedrivermod-show-global-hit",
     setting_type = "runtime-per-user",
     default_value = true,
@@ -31,28 +38,28 @@ data:extend({
     type = "bool-setting",
     name = "awesomedrivermod-multiplayer-show-forces-button",
     setting_type = "runtime-global",
-    default_value = true,
+    default_value = false,
     order = 'a-a'
   },
   {
     type = "bool-setting",
     name = "awesomedrivermod-multiplayer-show-global-hit",
-    setting_type = "runtime-global",
-    default_value = true,
+    setting_type = "runtime-per-user",
+    default_value = false,
     order = 'a-b'
   },
   {
     type = "bool-setting",
     name = "awesomedrivermod-multiplayer-show-highscore",
-    setting_type = "runtime-global",
-    default_value = true,
+    setting_type = "runtime-per-user",
+    default_value = false,
     order = 'a-c'
   },
   {
     type = "bool-setting",
     name = "awesomedrivermod-show-change-buttons",
-    setting_type = "runtime-global",
-    default_value = true,
+    setting_type = "runtime-per-user",
+    default_value = false,
     order = 'a-d'
   },
   {
