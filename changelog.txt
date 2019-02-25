@@ -1,3 +1,14 @@
+Version: 0.1.6
+Date: 25. 02. 2018
+    Fixes:
+        - Made MP safe(r)
+        - Settings now apply with proper options
+    Todo:
+        - Most of the mp stuff is incomplete, Have to show proper overviews and alike
+        - Remove some redundant code(?)
+        - MP button display and rights should be applied
+
+---------------------------------------------------------------------------------------------------
 Version: 0.1.4
 Date: 13. 08. 2018
     Fixes:
