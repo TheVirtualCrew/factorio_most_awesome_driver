@@ -5,7 +5,7 @@
   "author": "Tim Vroom @TheVirtualCrew",
   "contact": "",
   "homepage": "",
-  "factorio_version": "0.16",
-  "dependencies": ["base >= 0.16"],
+  "factorio_version": "0.17",
+  "dependencies": ["base >= 0.17"],
   "description": "This mod will add a car crash counter. As the most awesome driver you are, we need to keep track of it"
 }

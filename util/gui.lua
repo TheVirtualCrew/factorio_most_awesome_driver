@@ -20,13 +20,28 @@ gui = {
     end
 
     local prefix = global.data.prefix
-    local flow = player.gui.left[prefix .. 'flow']
+    local frame_flow = player.gui.left
+    local flow = frame_flow[prefix .. 'flow']
+    local frame;
     local global_setting = settings.global;
     local player_setting = settings.get_player_settings(player);
 
+    if flow then
+      frame = flow[prefix.."frame"]
+    else
+      flow = frame_flow.add {
+        type = "flow",
+        name = prefix .. "flow",
+        direction = 'vertical',
+      }
+      frame_flow.style.left_padding = 4
+      frame_flow.style.top_padding = 4
+      frame_flow.style.horizontally_stretchable = false
+    end
+
     if not player_setting["awesomedrivermod-show-table"].value then
-      if flow then
-        flow.destroy()
+      if frame then
+        frame.destroy()
       end
       return
     end
@@ -38,23 +53,32 @@ gui = {
       end
     end
 
-    if flow == nil then
-      flow = player.gui.left.add { type = "scroll-pane", name = prefix .. "flow" }
+    if frame == nil then
+      frame = flow.add {
+        type = "frame",
+        name = prefix .. "frame",
+        direction = 'vertical',
+      }
+      if player_setting['awesomedrivermod-table-title'].value then
+        frame.caption = player_setting['awesomedrivermod-table-title'].value
+      end
+      frame.style.title_bottom_padding = 0
+      frame.style.horizontally_stretchable = false
     end
 
-    local table = flow[prefix .. 'table']
+    local table = frame[prefix .. 'table']
     if table == nil then
 
-      table = flow.add {
+      table = frame.add {
         type = 'table',
         column_count = 2,
         name = prefix .. 'table',
-        style = 'awesomedriver_table_style'
       }
+      table.style.horizontal_spacing = 8
+      table.style.vertical_spacing = 0
       table.style.column_alignments[1] = "right"
 
       if (self.multiplayer) then
-
         if player_setting['awesomedrivermod-multiplayer-show-global-hit'].value then
           table.add { type = 'label', name = prefix .. 'hit_label', caption = { "hits" }, style = 'bold_label' }
           table.add { type = 'label', name = prefix .. 'hit_value', caption = "0" }
@@ -105,16 +129,18 @@ gui = {
     end
 
     if player.admin and player_setting['awesomedrivermod-show-change-buttons'].value then
-      local button_table = flow[prefix .. 'table_buttons']
+      local button_table = frame[prefix .. 'table_buttons']
       if button_table == nil then
-        button_table = flow.add {
-          type = 'table',
-          column_count = 3,
-          name = prefix .. 'table_buttons'
+        button_table = frame.add {
+          type = 'flow',
+          name = prefix .. 'table_buttons',
+          direction = "horizontal"
         }
-        button_table.add { type = 'button', style = "awesomedriver_button_style", name = prefix .. "min_button", caption = "-" }
-        button_table.add { type = 'button', style = "awesomedriver_button_style", name = prefix .. "plus_button", caption = "+" }
-        button_table.add { type = 'button', style = "awesomedriver_button_style", name = prefix .. "reset_button", caption = { "reset" } }
+        local minus = button_table.add { type = 'button', name = prefix .. "min_button", caption = "-" }
+        minus.style.minimal_width = 40;
+        local plus = button_table.add { type = 'button', name = prefix .. "plus_button", caption = "+" }
+        plus.style.minimal_width = 40;
+        button_table.add { type = 'button', name = prefix .. "reset_button", caption = { "reset" } }
         if self.multiplayer then
           button_table.add { type = 'button', style = "awesomedriver_button_style", name = prefix .. "reset_button_all", caption = { "reset-all" } }
         end
@@ -217,8 +243,8 @@ gui = {
     if changed or forced then
       local prefix = global.data.prefix
       for _, player in pairs(game.players) do
-        if player.gui.left[prefix .. "flow"] then
-          player.gui.left[prefix .. "flow"].destroy()
+        if player.gui.left[prefix .. "frame"] then
+          player.gui.left[prefix .. "frame"].destroy()
         end
       end
     end
