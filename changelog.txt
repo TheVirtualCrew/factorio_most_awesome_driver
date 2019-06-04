@@ -1,3 +1,11 @@
+Version: 0.2.0
+Date: 05. 05. 2018
+    Fixes:
+        - Minor fixes for mp
+        - Updates for latest 0.17 version (0.17.35+)
+        - Some improvements for MP, but bugs are welcome to be reported
+
+---------------------------------------------------------------------------------------------------
 Version: 0.1.6
 Date: 25. 02. 2018
     Fixes:
