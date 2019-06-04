@@ -62,7 +62,6 @@ gui = {
       if player_setting['awesomedrivermod-table-title'].value then
         frame.caption = player_setting['awesomedrivermod-table-title'].value
       end
-      frame.style.title_bottom_padding = 0
       frame.style.horizontally_stretchable = false
     end
 
