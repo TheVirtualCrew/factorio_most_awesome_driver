@@ -66,7 +66,6 @@ awesomedrivermod.trigger_hit = function(self, event)
   local equalPosition = equalPosition
   local gui = gui
   local entity_driver = event.entity.type == 'car' and event.entity.get_driver()
-
   -- check if not hitting ourselves
   if entity_driver and entity_driver.player and entity_driver.player.name == player.name then
     return
@@ -101,7 +100,7 @@ awesomedrivermod.trigger_hit = function(self, event)
     playerData.driving_ticks = 0
     playerData.last_enter_tick = game.tick
 
-    script.raise_event(global.events.on_car_crash, { player_index = player.index, cause = event.cause, entity = event.entity })
+    script.raise_event(events.on_car_crash, { player_index = player.index, cause = event.cause, entity = event.entity })
 
     gui:update_table()
   end

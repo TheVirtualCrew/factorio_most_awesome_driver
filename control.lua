@@ -4,10 +4,9 @@
 
 require('util');
 require("mod-gui")
-local events = {
+events = {
   on_car_crash = script.generate_event_name()
 }
-global.events = events;
 global.data = {
   forces = {},
   count_spacer = 60,
@@ -21,7 +20,6 @@ require('util/gui');
 local gui = gui
 
 local function init_globals()
-  global.events = global.events or events;
   global.data = global.data or {
     forces = {},
     count_spacer = 60,
@@ -70,14 +68,10 @@ end)
 -- setup: Make sure the data is accesible when changing/updating mods
 script.on_init(function()
   init_globals();
-  require('util/awesomedrivermod')
-  require('util/gui')
 end)
 
 script.on_configuration_changed(function()
   init_globals();
-  require('util/awesomedrivermod')
-  require('util/gui')
 end)
 
 script.on_event(defines.events.on_research_finished, function(event)
@@ -98,8 +92,8 @@ end)
 
 remote.add_interface('most_awesome_driver', {
   get_event = function(name)
-    if global.events[name] then
-      return global.events[name]
+    if events[name] then
+      return events[name]
     end
     return nil;
   end
